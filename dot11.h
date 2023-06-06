@@ -10,7 +10,7 @@ typedef struct ieee80211_frame {
     Mac dst_mac;           // Address 1 (Destination MAC address)
     Mac src_mac;           // Address 2 (Source MAC address)
     Mac bssid;           // Address 3 (BSSID/MAC address of the access point)
-    uint16_t seq_ctrl;          // Sequence control field
+    u_int16_t seq_ctrl;          // Sequence control field
     // Additional fields can follow depending on the frame type
 } __attribute__((__packed__)) beacon_frame_t;
 
@@ -33,4 +33,4 @@ typedef struct ieee80211_rsn {
     u_int16_t version;
     u_int32_t group_cipher_suite;
     u_int16_t pairwise_cipher_count;
-} rsn_hdr_t;
+} __attribute__((__packed__)) rsn_hdr_t;
