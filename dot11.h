@@ -5,8 +5,8 @@
 #define FIXED_PARAM_SIZE 12
 
 typedef struct ieee80211_frame {
-    uint8_t frame_control[2];   // Frame control field
-    uint16_t duration_id;       // Duration/ID field
+    u_int8_t frame_control[2];   // Frame control field
+    u_int16_t duration_id;       // Duration/ID field
     Mac dst_mac;           // Address 1 (Destination MAC address)
     Mac src_mac;           // Address 2 (Source MAC address)
     Mac bssid;           // Address 3 (BSSID/MAC address of the access point)
@@ -19,4 +19,18 @@ typedef struct ieee80211_radiotap_header {
     u_int8_t        it_pad;
     u_int16_t       it_len;         /* entire length */
     u_int32_t       it_present;     /* fields present */
+    /* radiotap data fields */
+    u_int8_t        mac_timestamp[8];
+    u_int8_t        flags;
+    u_int8_t        rate;
+    u_int16_t       channel_frequency;
+    u_int16_t       channel_flags;
+    u_int8_t        dbm_antenna_signal;
+    u_int8_t        dbm_antenna_noise;
 } __attribute__((__packed__)) radiotap_header_t;
+
+typedef struct ieee80211_rsn {
+    u_int16_t version;
+    u_int32_t group_cipher_suite;
+    u_int16_t pairwise_cipher_count;
+} rsn_hdr_t;
