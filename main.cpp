@@ -1,4 +1,3 @@
-
 #include "main.h"
 using namespace std;
 
@@ -20,24 +19,32 @@ void airodump(const u_char *packet, int length){
         dot11_frame_info_t info;
         info.Beacons = 0;
         info.PWR = (int)(signed char)rt_header->dbm_antenna_signal;
-
+        cout << "PWR: " << info.PWR << "\n";
+        cout << "BSSID: " << string(beacon->bssid) << "\n";
         int data_start_idx = rt_header->it_len + sizeof(beacon) + FIXED_PARAM_SIZE;
         while(data_start_idx < length){
             int tag_num = packet[data_start_idx];
             int tag_len = packet[data_start_idx + 1];
+            if (data_start_idx + tag_len + 2 >= length) break;
             if (tag_num == 0) {
                 memcpy(info.ESSID, packet + data_start_idx + 2, tag_len);
+                cout << "tag num: " << tag_num << "\n";
+                cout << "tag len: " << tag_len << "\n";
+                cout << "ESSID: " << *(packet + data_start_idx + 2) << "\n";
                 info.ESSID[tag_len] = '\0';
+                cout << "ESSID: " << info.ESSID << "\n";
             }
             else if (tag_num == 0x30) {
+                cout << "tag num: " << tag_num << "\n";
+                cout << "tag len: " << tag_len << "\n";
                 rsn_hdr_t *rsn = (rsn_hdr_t *)(packet + data_start_idx + 2);
                 int cipher_count = rsn->pairwise_cipher_count;
                 int wpa_version = packet[data_start_idx + 2 + sizeof(rsn_hdr_t) + 4 * rsn->pairwise_cipher_count + 5];
                 cout << "WPA v" << wpa_version << " \n";
             }
-            else {
-                data_start_idx += tag_len;
-            }
+            
+            data_start_idx += (tag_len);
+            // cout << "tag pass\n" << data_start_idx << " " << length << "\n";
         }
     }
     else {
@@ -69,7 +76,7 @@ int main(int argc, char* argv[]){
         if (res == 0) continue;
         if (res == PCAP_ERROR || res == PCAP_ERROR_BREAK) break;
 
-        airodump(packet, header->len);
+        airodump(packet, header->caplen);
     }
 
 }
