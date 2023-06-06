@@ -8,6 +8,16 @@ void usage(){
     cout<<"sample : airodump mon0\n";
 }
 
+void console_log(){
+    system("clear");  
+    cout << "BSSID              PWR  Beacons  ENC  ESSID\n";
+    cout << "-------------------------------------------\n";
+    for (auto it:cache){
+        cout << string(it.first) << "  " << it.second.PWR << "  " << it.second.Beacons << "      " << it.second.ENC << "  " << it.second.ESSID << "\n";
+    }
+    cout << "\n";
+
+}
 void airodump(const u_char *packet, int length){
     radiotap_header_t *rt_header = (radiotap_header_t *)packet;
     beacon_frame_t *beacon = (beacon_frame_t *)(packet + rt_header->it_len);
@@ -24,29 +34,32 @@ void airodump(const u_char *packet, int length){
         while(data_start_idx < length){
             int tag_num = packet[data_start_idx];
             int tag_len = packet[data_start_idx + 1];
+            memcpy(info.ENC, "None     \0", 10);
             if (data_start_idx + tag_len + 2 >= length) break;
             if (tag_num == 0) {
                 memcpy(info.ESSID, packet + data_start_idx + 2, tag_len);
                 info.ESSID[tag_len] = '\0';
-                cout << "ESSID: " << info.ESSID << "\n";
             }
             else if (tag_num == 0x30) {
                 rsn_hdr_t *rsn = (rsn_hdr_t *)(packet + data_start_idx + 2);
-                int cipher_count = rsn->pairwise_cipher_count;
-                cout << "cipher version: " << rsn->version << "\n";
-                cout << "cipher suite: " << rsn->group_cipher_suite << "\n";
-                cout << "cipher count: " << cipher_count << "\n";
                 int wpa_version = packet[data_start_idx + 2 + sizeof(rsn_hdr_t) + 4 * rsn->pairwise_cipher_count + 5];
-                cout << "WPA v" << wpa_version << " \n";
+                if (wpa_version == 2) {
+                    memcpy(info.ENC, "WPA2     \0", 10);
+                }
+                else {
+                    memcpy(info.ENC, "WPA      \0", 10);
+                }
             }
             
-            data_start_idx += (tag_len+2);
+            data_start_idx += (tag_len + 2);
             // cout << "tag pass\n" << data_start_idx << " " << length << "\n";
         }
+        cache[beacon->bssid] = info;
     }
     else {
         cache[beacon->bssid].Beacons++;
     }
+    console_log();
 }
 
 int main(int argc, char* argv[]){

@@ -10,5 +10,5 @@ typedef struct dot11_frame_info {
     int Beacons;
     int PWR;
     char ENC[10];
-    char ESSID[10];
+    char ESSID[20];
 } dot11_frame_info_t;
